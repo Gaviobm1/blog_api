@@ -20,22 +20,19 @@ class User {
     });
   }
   async createAdmin(user) {
-    const notAdmin = await this.getUser(user.id);
-    if (!notAdmin) {
-      throw new Error("User doesn't exist");
+    try {
+      const admin = await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          role: "ADMIN",
+        },
+      });
+      return admin.role;
+    } catch (err) {
+      return err;
     }
-    if (notAdmin.role === "ADMIN") {
-      return { message: "User already admin" };
-    }
-    const admin = await prisma.user.update({
-      where: {
-        id: notAdmin.id,
-      },
-      data: {
-        role: "ADMIN",
-      },
-    });
-    return admin;
   }
   async removeAdmin(user) {
     const admin = await this.getUser(user.id);

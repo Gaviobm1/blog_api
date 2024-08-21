@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 
 const verifyCallback = async (jwt_payload, done) => {
   try {
-    const user = await db.user.getUser(jwt_payload.id);
+    const user = await db.user.getUser(jwt_payload);
     if (!user) return done(null, false, { message: "Invalid user" });
     return done(null, jwt_payload);
   } catch (err) {

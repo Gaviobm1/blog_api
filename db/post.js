@@ -27,10 +27,10 @@ class Post {
       },
     });
   }
-  async getPost(post) {
+  async getPost(id) {
     return await prisma.post.findUnique({
       where: {
-        id: post.id,
+        id,
       },
     });
   }

@@ -1,6 +1,7 @@
 const db = require("../db");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
+const auth = require("../auth");
 
 const validateUser = [
   body("username").trim().isLength({ min: 1 }).isAlphanumeric().escape(),
@@ -45,3 +46,28 @@ exports.createUser = [
     });
   },
 ];
+
+exports.makeAdmin = async (req, res) => {
+  if (req.user.role === "ADMIN") {
+    return res.json({
+      message: "User is already admin",
+    });
+  }
+  const updated = await db.user.createAdmin(req.user);
+  req.user.role = updated;
+  res.json({
+    user: req.user,
+  });
+};
+
+exports.deleteUser = async (req, res) => {
+  if (!req.user) {
+    return res.json({
+      message: "No user",
+    });
+  }
+  const deleted = await db.user.deleteUser(req.user);
+  res.json({
+    deleted,
+  });
+};

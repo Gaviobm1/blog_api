@@ -9,13 +9,18 @@ const validatePost = [
 exports.createPost = [
   validatePost,
   async (req, res) => {
+    if (!req.user || req.user.role !== "ADMIN") {
+      return res.status(401).json({
+        message: "Posts can only be created by authorised users",
+      });
+    }
     const errors = validationResult(req);
     const post = {
       title: req.body.title,
       text: req.body.text,
     };
     if (!errors.isEmpty()) {
-      res.json({
+      return res.json({
         post,
         errors: errors.array(),
       });
