@@ -10,6 +10,10 @@ async function jwtSign(req, res) {
     where: {
       username: req.body.username,
     },
+    include: {
+      posts: true,
+      comments: true,
+    },
   });
   if (!user) res.status(401).json({ message: "Invalid user" });
   const isMatch = await bcrypt.compare(req.body.password, user.password);
@@ -18,7 +22,7 @@ async function jwtSign(req, res) {
   jwt.sign(
     payload,
     process.env.SECRET_KEY,
-    { expiresIn: "120s" },
+    { expiresIn: "60m" },
     (err, token) => {
       if (err) {
         res.json(err);
