@@ -14,7 +14,7 @@ class Comment {
       });
       return newComment;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async getPostComments(postId) {
@@ -26,7 +26,7 @@ class Comment {
       });
       return comments;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async getUserComments(authorId) {
@@ -38,7 +38,7 @@ class Comment {
       });
       return comments;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async getComment(id) {
@@ -50,7 +50,7 @@ class Comment {
       });
       return comment;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async updateComment(comment) {
@@ -65,7 +65,7 @@ class Comment {
       });
       return comment;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async likePost(id) {
@@ -82,7 +82,7 @@ class Comment {
       });
       return comment;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async dislikePost(id) {
@@ -99,7 +99,7 @@ class Comment {
       });
       return comment;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async deleteComment(id) {
@@ -111,7 +111,7 @@ class Comment {
       });
       return deleted;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async deleteAllPostComments(postId) {
@@ -123,7 +123,7 @@ class Comment {
       });
       return deleted;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async deleteAllUserComments(authorId) {
@@ -135,7 +135,7 @@ class Comment {
       });
       return deleted;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
 }

@@ -15,7 +15,7 @@ class Post {
       });
       return newPost;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async getAllPosts() {
@@ -31,7 +31,7 @@ class Post {
       });
       return posts;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async getAllUserPosts(user) {
@@ -45,7 +45,7 @@ class Post {
         },
       });
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async getPost(id) {
@@ -56,7 +56,7 @@ class Post {
         },
       });
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async updatePost(post, authorId) {
@@ -73,7 +73,7 @@ class Post {
       });
       return updatedPost;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async deletePost(id, authorId) {
@@ -87,7 +87,7 @@ class Post {
       });
       return deleted;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async deleteAllUserPosts(id) {
@@ -101,7 +101,7 @@ class Post {
         await this.deletePost(post.id);
       }
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async likePost(id) {
@@ -118,7 +118,7 @@ class Post {
       });
       return post;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
 }

@@ -14,7 +14,7 @@ class User {
       });
       return newUser;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async getUser(id) {
@@ -25,7 +25,7 @@ class User {
         },
       });
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async updatePassword(id, newPassword) {
@@ -39,7 +39,7 @@ class User {
         },
       });
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async createAdmin(username) {
@@ -54,7 +54,7 @@ class User {
       });
       return admin;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async removeAdmin(username) {
@@ -69,7 +69,7 @@ class User {
       });
       return notAdmin;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
   async deleteUser(id) {

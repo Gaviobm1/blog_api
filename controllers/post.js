@@ -1,4 +1,5 @@
 const db = require("../db");
+const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const helpers = require("../helpers");
 
@@ -9,11 +10,11 @@ const validatePost = [
 
 exports.createPost = [
   validatePost,
-  async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     if (req.user.role !== "ADMIN") {
-      return res.status(401).json({
-        message: "Posts can only be created by authorised users",
-      });
+      const err = new Error("Posts can only be created by authorised users");
+      err.status = 401;
+      return next(err);
     }
     const errors = validationResult(req);
     const post = {
@@ -30,44 +31,34 @@ exports.createPost = [
     res.json({
       post: newPost,
     });
-  },
+  }),
 ];
 
-exports.getPost = async (req, res) => {
+exports.getPost = asyncHandler(async (req, res) => {
   const post = await db.post.getPost(req.params.id);
   res.json({
     post,
   });
-};
+});
 
-exports.getPublishedPosts = async (req, res) => {
+exports.getPublishedPosts = asyncHandler(async (req, res, next) => {
   let posts = await db.post.getAllPosts();
-  if (!posts) {
-    return res.json({
-      message: "No posts",
-    });
-  }
   posts = helpers.extractPassword(posts);
   res.json({
     posts,
   });
-};
+});
 
-exports.getUserPosts = async (req, res) => {
+exports.getUserPosts = asyncHandler(async (req, res) => {
   const userPosts = await db.post.getAllUserPosts(req.user);
-  if (!userPosts) {
-    res.json({
-      message: "No posts yet",
-    });
-  }
   res.json({
     userPosts,
   });
-};
+});
 
 exports.editPost = [
   validatePost,
-  async (req, res) => {
+  asyncHandler(async (req, res) => {
     const errors = validationResult(req);
     const post = {
       id: req.params.id,
@@ -84,29 +75,29 @@ exports.editPost = [
     res.json({
       post: newPost,
     });
-  },
+  }),
 ];
 
-exports.deletePost = async (req, res) => {
+exports.deletePost = asyncHandler(async (req, res) => {
   const deleted = await db.post.deletePost(req.params.id, req.user.id);
   if (!deleted) {
-    return res.json({
-      message: "Post doesn't exist",
-    });
+    const err = new Error("Post not found");
+    err.status = 404;
+    return next(err);
   }
   res.json({
     post: deleted,
   });
-};
+});
 
-exports.likePost = async (req, res) => {
-  const post = await db.post.likePost(req.parama.id);
+exports.likePost = asyncHandler(async (req, res) => {
+  const post = await db.post.likePost(req.params.id);
   if (!post) {
-    return res.json({
-      message: "Post like failed",
-    });
+    const err = new Error("Post not found");
+    err.status = 404;
+    return next(err);
   }
   res.json({
     post,
   });
-};
+});

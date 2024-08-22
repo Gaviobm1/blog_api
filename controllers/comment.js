@@ -1,11 +1,12 @@
 const db = require("../db");
+const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 
 const validateComment = [body("text").trim().isLength({ min: 1 }).escape()];
 
 exports.createComment = [
   validateComment,
-  async (req, res) => {
+  asyncHandler(async (req, res) => {
     const errors = validationResult(req);
     const comment = {
       text: req.body.text,
@@ -24,29 +25,34 @@ exports.createComment = [
     res.json({
       comment: newComment,
     });
-  },
+  }),
 ];
-exports.getComment = async (req, res) => {
+exports.getComment = async (req, res, next) => {
   const comment = await db.comment.getComment(req.params.commentId);
+  if (!comment) {
+    const err = new Error("Comment not found");
+    err.status = 401;
+    return next(err);
+  }
   res.json({
     comment,
   });
 };
-exports.getPostComments = async (req, res) => {
+exports.getPostComments = asyncHandler(async (req, res) => {
   const comments = await db.comment.getPostComments(req.params.id);
   res.json({
     comments,
   });
-};
+});
 
-exports.getUserComments = async (req, res) => {
+exports.getUserComments = asyncHandler(async (req, res) => {
   const comments = await db.comment.getUserComments(req.user.id);
   res.json({
     comments,
   });
-};
+});
 
-exports.updateComment = async (req, res) => {
+exports.updateComment = asyncHandler(async (req, res) => {
   const comment = {
     id: req.body.id,
     text: req.body.text,
@@ -55,25 +61,25 @@ exports.updateComment = async (req, res) => {
   res.json({
     comment: updatedComment,
   });
-};
+});
 
-exports.likeComment = async (req, res) => {
+exports.likeComment = asyncHandler(async (req, res) => {
   const comment = await db.comment.likePost(req.body.id);
   res.json({
     comment,
   });
-};
+});
 
-exports.dislikeComment = async (req, res) => {
+exports.dislikeComment = asyncHandler(async (req, res) => {
   const comment = await db.comment.dislikePost(req.body.id);
   res.json({
     comment,
   });
-};
+});
 
-exports.deleteComment = async (req, res) => {
+exports.deleteComment = asyncHandler(async (req, res) => {
   const comment = await db.comment.deleteComment(req.body.id);
   res.json({
     comment,
   });
-};
+});

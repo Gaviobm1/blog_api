@@ -1,4 +1,5 @@
 const db = require("../db");
+const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const auth = require("../auth");
@@ -50,9 +51,12 @@ const validateNewPassword = [
 
 exports.createUser = [
   validateUser,
-  (req, res, next) => {
+  asyncHandler((req, res, next) => {
     const errors = validationResult(req);
     bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+      if (err) {
+        return next(err);
+      }
       const user = {
         username: req.body.username,
         password: hashedPassword,
@@ -66,19 +70,24 @@ exports.createUser = [
       await db.user.createUser(user);
       next();
     });
-  },
+  }),
 ];
 
-exports.getUser = async (req, res) => {
+exports.getUser = asyncHandler(async (req, res, next) => {
   const user = await db.user.getUser(req.params.id);
+  if (!user) {
+    const err = new Error("User not found");
+    err.status = 404;
+    return next(err);
+  }
   res.json({
     user,
   });
-};
+});
 
 exports.changePassword = [
   validateNewPassword,
-  async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.json({
@@ -88,54 +97,52 @@ exports.changePassword = [
     const { password } = await db.user.getUser(req.user.id);
     const isMatch = bcrypt.compare(req.body.password, password);
     if (!isMatch) {
-      return res.json({
-        message: "Wrong password",
-      });
+      const err = new Error("Passwords don't match");
+      err.status = 401;
+      return next(err);
     }
     bcrypt.hash(req.body.new_password, 10, async (err, hashedPassword) => {
       if (err) {
-        return res.status(401).json({
-          message: "Password change failed",
-        });
+        return next(err);
       }
       await db.user.updatePassword(req.user.id, hashedPassword);
       res.redirect(`/users/${req.user.id}`);
     });
-  },
+  }),
 ];
 
-exports.makeAdmin = async (req, res) => {
+exports.makeAdmin = asyncHandler(async (req, res, next) => {
   if (req.user.role !== "ADMIN") {
-    return res.json({
-      message: "Only admins may create admins",
-    });
+    const err = new Error("Only admins may create admins");
+    err.status = 401;
+    return next(err);
   }
   const updated = await db.user.createAdmin(req.body.username);
   res.json({
     user: updated,
   });
-};
+});
 
-exports.removeAdmin = async (req, res) => {
+exports.removeAdmin = asyncHandler(async (req, res) => {
   if (req.user.role !== "ADMIN") {
-    return res.json({
-      message: "Only admins can remove admins",
-    });
+    const err = new Error("Only admins may remove admins");
+    err.status = 401;
+    return next(err);
   }
   const updated = await db.user.removeAdmin(req.body.username);
   res.json({
     user: updated,
   });
-};
+});
 
-exports.deleteUser = async (req, res) => {
+exports.deleteUser = asyncHandler(async (req, res) => {
   if (!req.user) {
-    return res.json({
-      message: "No user",
-    });
+    const err = new Error("Unauthenticated user");
+    err.status = 401;
+    return next(err);
   }
   const deleted = await db.user.deleteUser(req.params.id);
   res.json({
     deleted,
   });
-};
+});
