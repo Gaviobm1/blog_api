@@ -9,7 +9,7 @@ const validatePost = [
 exports.createPost = [
   validatePost,
   async (req, res) => {
-    if (!req.user || req.user.role !== "ADMIN") {
+    if (req.user.role !== "ADMIN") {
       return res.status(401).json({
         message: "Posts can only be created by authorised users",
       });
@@ -45,11 +45,6 @@ exports.getPublishedPosts = async (req, res) => {
 };
 
 exports.getUserPosts = async (req, res) => {
-  if (!req.user) {
-    res.json({
-      message: "Must be a valid user and signed in",
-    });
-  }
   const userPosts = await db.post.getAllUserPosts(req.user);
   if (!userPosts) {
     res.json({
@@ -58,5 +53,50 @@ exports.getUserPosts = async (req, res) => {
   }
   res.json({
     userPosts,
+  });
+};
+
+exports.editPost = [
+  validatePost,
+  async (req, res) => {
+    const errors = validationResult(req);
+    const post = {
+      title: req.body.title,
+      text: req.body.text,
+    };
+    if (!errors.isEmpty()) {
+      return res.json({
+        post,
+        errors: errors.array(),
+      });
+    }
+    const newPost = await db.post.updatePost(post);
+    res.json({
+      post: newPost,
+    });
+  },
+];
+
+exports.deletePost = async (req, res) => {
+  const deleted = await db.post.deletePost(req.params.id);
+  if (!deleted) {
+    return res.json({
+      message: "Post doesn't exist",
+    });
+  }
+  res.json({
+    post: deleted,
+  });
+};
+
+exports.likePost = async (req, res) => {
+  const post = await db.post.likePost(req.parama.id);
+  if (!post) {
+    return res.json({
+      message: "Post like failed",
+    });
+  }
+  res.json({
+    post,
   });
 };

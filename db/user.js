@@ -1,4 +1,5 @@
 const { PrismaClient, Prisma } = require("@prisma/client");
+const db = require("./index");
 
 const prisma = new PrismaClient();
 
@@ -53,6 +54,7 @@ class User {
     return notAdmin;
   }
   async deleteUser(user) {
+    await db.post.deleteAllUserPosts(user.id);
     const deleted = await prisma.user.delete({
       where: {
         id: user.id,

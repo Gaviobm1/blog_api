@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const db = require("./index");
 
 const prisma = new PrismaClient();
 
@@ -46,13 +47,37 @@ class Post {
     });
     return updatedPost;
   }
-  async deletePost(post) {
+  async deletePost(id) {
+    await db.comment.deleteAllPostComments(id);
     const deleted = await prisma.post.delete({
       where: {
-        id: post.id,
+        id,
       },
     });
     return deleted;
+  }
+  async deleteAllUserPosts(id) {
+    const toBeDeleted = await prisma.post.findMany({
+      where: {
+        id,
+      },
+    });
+    for await (const post of toBeDeleted) {
+      await this.deletePost(post.id);
+    }
+  }
+  async likePost(id) {
+    const post = await prisma.post.update({
+      where: {
+        id,
+      },
+      data: {
+        likes: {
+          increment: 1,
+        },
+      },
+    });
+    return post;
   }
 }
 

@@ -15,9 +15,9 @@ async function jwtSign(req, res) {
       comments: true,
     },
   });
-  if (!user) res.status(401).json({ message: "Invalid user" });
+  if (!user) return res.status(401).json({ message: "Invalid user" });
   const isMatch = await bcrypt.compare(req.body.password, user.password);
-  if (!isMatch) res.status(401).json({ message: "Invalid password" });
+  if (!isMatch) return res.status(401).json({ message: "Invalid password" });
   const { password, ...payload } = user;
   jwt.sign(
     payload,

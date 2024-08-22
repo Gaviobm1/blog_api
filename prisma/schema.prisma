@@ -21,6 +21,7 @@ model Post {
   title String
   text  String
   status  Status  @default(PUBLISHED)
+  likes Int @default(0)
   createdAt DateTime  @default(now())
   author  User  @relation(fields: [authorId], references: [id])
   authorId  Int
@@ -30,6 +31,7 @@ model Post {
 model Comment {
   id  Int @id @default(autoincrement())
   text  String
+  likes Int @default(0)
   createAt  DateTime  @default(now())
   author  User  @relation(fields: [authorId], references: [id])
   authorId  Int
@@ -41,6 +43,7 @@ enum Role {
   ADMIN
   USER  
   GUEST
+  DORMANT
 }
 
 enum Status {
