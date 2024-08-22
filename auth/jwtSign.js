@@ -5,7 +5,7 @@ require("dotenv").config();
 
 const prisma = new PrismaClient();
 
-async function jwtSign(req, res) {
+async function jwtSign(req, res, next) {
   const user = await prisma.user.findUnique({
     where: {
       username: req.body.username,
@@ -15,9 +15,17 @@ async function jwtSign(req, res) {
       comments: true,
     },
   });
-  if (!user) return res.status(401).json({ message: "Invalid user" });
+  if (!user) {
+    const err = new Error("Invalid username");
+    err.status = 401;
+    return next(err);
+  }
   const isMatch = await bcrypt.compare(req.body.password, user.password);
-  if (!isMatch) return res.status(401).json({ message: "Invalid password" });
+  if (!isMatch) {
+    const err = new Error("Invalid password");
+    err.status = 401;
+    return next(err);
+  }
   const { password, ...payload } = user;
   jwt.sign(
     payload,

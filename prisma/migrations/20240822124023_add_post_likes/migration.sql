@@ -1,0 +1,8 @@
+-- AlterEnum
+ALTER TYPE "Role" ADD VALUE 'DORMANT';
+
+-- AlterTable
+ALTER TABLE "Comment" ADD COLUMN     "likes" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "Post" ADD COLUMN     "likes" INTEGER NOT NULL DEFAULT 0;
