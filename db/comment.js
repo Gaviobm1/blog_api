@@ -4,99 +4,139 @@ const prisma = new PrismaClient();
 
 class Comment {
   async createComment(comment, postId, authorId) {
-    const newComment = await prisma.comment.create({
-      data: {
-        text: comment.text,
-        postId,
-        authorId,
-      },
-    });
-    return newComment;
+    try {
+      const newComment = await prisma.comment.create({
+        data: {
+          text: comment.text,
+          postId,
+          authorId,
+        },
+      });
+      return newComment;
+    } catch (err) {
+      return err;
+    }
   }
   async getPostComments(postId) {
-    const comments = await prisma.comment.findMany({
-      where: {
-        postId,
-      },
-    });
-    return comments;
+    try {
+      const comments = await prisma.comment.findMany({
+        where: {
+          postId,
+        },
+      });
+      return comments;
+    } catch (err) {
+      return err;
+    }
   }
   async getUserComments(authorId) {
-    const comments = await prisma.comment.findMany({
-      where: {
-        authorId,
-      },
-    });
-    return comments;
+    try {
+      const comments = await prisma.comment.findMany({
+        where: {
+          authorId,
+        },
+      });
+      return comments;
+    } catch (err) {
+      return err;
+    }
   }
   async getComment(id) {
-    const comment = await prisma.comment.findUnique({
-      where: {
-        id,
-      },
-    });
-    return comment;
+    try {
+      const comment = await prisma.comment.findUnique({
+        where: {
+          id,
+        },
+      });
+      return comment;
+    } catch (err) {
+      return err;
+    }
   }
   async updateComment(comment) {
-    const comment = await prisma.comment.update({
-      where: {
-        id: comment.id,
-      },
-      data: {
-        text: comment.text,
-      },
-    });
-    return comment;
+    try {
+      const comment = await prisma.comment.update({
+        where: {
+          id: comment.id,
+        },
+        data: {
+          text: comment.text,
+        },
+      });
+      return comment;
+    } catch (err) {
+      return err;
+    }
   }
   async likePost(id) {
-    const comment = await prisma.comment.update({
-      where: {
-        id,
-      },
-      data: {
-        likes: {
-          increment: 1,
+    try {
+      const comment = await prisma.comment.update({
+        where: {
+          id,
         },
-      },
-    });
-    return comment;
+        data: {
+          likes: {
+            increment: 1,
+          },
+        },
+      });
+      return comment;
+    } catch (err) {
+      return err;
+    }
   }
   async dislikePost(id) {
-    const comment = await prisma.comment.update({
-      where: {
-        id,
-      },
-      data: {
-        likes: {
-          decrement: 1,
+    try {
+      const comment = await prisma.comment.update({
+        where: {
+          id,
         },
-      },
-    });
-    return comment;
+        data: {
+          likes: {
+            decrement: 1,
+          },
+        },
+      });
+      return comment;
+    } catch (err) {
+      return err;
+    }
   }
   async deleteComment(id) {
-    const deleted = await prisma.comment.delete({
-      where: {
-        id,
-      },
-    });
-    return deleted;
+    try {
+      const deleted = await prisma.comment.delete({
+        where: {
+          id,
+        },
+      });
+      return deleted;
+    } catch (err) {
+      return err;
+    }
   }
   async deleteAllPostComments(postId) {
-    const deleted = await prisma.comment.deleteMany({
-      where: {
-        postId,
-      },
-    });
-    return deleted;
+    try {
+      const deleted = await prisma.comment.deleteMany({
+        where: {
+          postId,
+        },
+      });
+      return deleted;
+    } catch (err) {
+      return err;
+    }
   }
   async deleteAllUserComments(authorId) {
-    const deleted = await prisma.comment.deleteMany({
-      where: {
-        authorId,
-      },
-    });
-    return deleted;
+    try {
+      const deleted = await prisma.comment.deleteMany({
+        where: {
+          authorId,
+        },
+      });
+      return deleted;
+    } catch (err) {
+      return err;
+    }
   }
 }
 

@@ -26,7 +26,12 @@ exports.createComment = [
     });
   },
 ];
-
+exports.getComment = async (req, res) => {
+  const comment = await db.comment.getComment(req.params.commentId);
+  res.json({
+    comment,
+  });
+};
 exports.getPostComments = async (req, res) => {
   const comments = await db.comment.getPostComments(req.params.id);
   res.json({

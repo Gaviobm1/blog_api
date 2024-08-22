@@ -1,5 +1,6 @@
 const db = require("../db");
 const { body, validationResult } = require("express-validator");
+const helpers = require("../helpers");
 
 const validatePost = [
   body("title").trim().isLength({ min: 1 }).escape(),
@@ -32,13 +33,21 @@ exports.createPost = [
   },
 ];
 
+exports.getPost = async (req, res) => {
+  const post = await db.post.getPost(req.params.id);
+  res.json({
+    post,
+  });
+};
+
 exports.getPublishedPosts = async (req, res) => {
-  const posts = await db.post.getAllPosts();
+  let posts = await db.post.getAllPosts();
   if (!posts) {
-    res.json({
+    return res.json({
       message: "No posts",
     });
   }
+  posts = helpers.extractPassword(posts);
   res.json({
     posts,
   });
@@ -61,6 +70,7 @@ exports.editPost = [
   async (req, res) => {
     const errors = validationResult(req);
     const post = {
+      id: req.params.id,
       title: req.body.title,
       text: req.body.text,
     };
@@ -70,7 +80,7 @@ exports.editPost = [
         errors: errors.array(),
       });
     }
-    const newPost = await db.post.updatePost(post);
+    const newPost = await db.post.updatePost(post, req.user.id);
     res.json({
       post: newPost,
     });
@@ -78,7 +88,7 @@ exports.editPost = [
 ];
 
 exports.deletePost = async (req, res) => {
-  const deleted = await db.post.deletePost(req.params.id);
+  const deleted = await db.post.deletePost(req.params.id, req.user.id);
   if (!deleted) {
     return res.json({
       message: "Post doesn't exist",

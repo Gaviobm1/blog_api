@@ -26,6 +26,28 @@ const validateUser = [
     .escape(),
 ];
 
+const validateNewPassword = [
+  body("new_password")
+    .trim()
+    .isStrongPassword({
+      minLength: 8,
+      minUppercase: 1,
+      minLowercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    })
+    .escape(),
+  body("confirm_password")
+    .trim()
+    .custom((val, { req }) => {
+      if (val !== req.body.password) {
+        throw new Error("Password do not match");
+      }
+      return true;
+    })
+    .escape(),
+];
+
 exports.createUser = [
   validateUser,
   (req, res, next) => {
@@ -47,16 +69,62 @@ exports.createUser = [
   },
 ];
 
+exports.getUser = async (req, res) => {
+  const user = await db.user.getUser(req.params.id);
+  res.json({
+    user,
+  });
+};
+
+exports.changePassword = [
+  validateNewPassword,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({
+        errors: errors.array(),
+      });
+    }
+    const { password } = await db.user.getUser(req.user.id);
+    const isMatch = bcrypt.compare(req.body.password, password);
+    if (!isMatch) {
+      return res.json({
+        message: "Wrong password",
+      });
+    }
+    bcrypt.hash(req.body.new_password, 10, async (err, hashedPassword) => {
+      if (err) {
+        return res.status(401).json({
+          message: "Password change failed",
+        });
+      }
+      await db.user.updatePassword(req.user.id, hashedPassword);
+      res.redirect(`/users/${req.user.id}`);
+    });
+  },
+];
+
 exports.makeAdmin = async (req, res) => {
-  if (req.user.role === "ADMIN") {
+  if (req.user.role !== "ADMIN") {
     return res.json({
-      message: "User is already admin",
+      message: "Only admins may create admins",
     });
   }
-  const updated = await db.user.createAdmin(req.user);
-  req.user.role = updated;
+  const updated = await db.user.createAdmin(req.body.username);
   res.json({
-    user: req.user,
+    user: updated,
+  });
+};
+
+exports.removeAdmin = async (req, res) => {
+  if (req.user.role !== "ADMIN") {
+    return res.json({
+      message: "Only admins can remove admins",
+    });
+  }
+  const updated = await db.user.removeAdmin(req.body.username);
+  res.json({
+    user: updated,
   });
 };
 
@@ -66,7 +134,7 @@ exports.deleteUser = async (req, res) => {
       message: "No user",
     });
   }
-  const deleted = await db.user.deleteUser(req.user);
+  const deleted = await db.user.deleteUser(req.params.id);
   res.json({
     deleted,
   });
